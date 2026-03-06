@@ -250,17 +250,17 @@ describe('Markdown Outliner - Regression Protection', () => {
     expect(() => setupTestDocument('')).not.toThrow();
   });
 
-  test.skip('heading with no content gets no toggle button', () => {
+  test('heading with no content gets no toggle button', () => {
     setupTestDocument(`
-      <h1>First</h1>
-      <h2>Second immediately after</h2>
-      <p>Content</p>
+      <h1>Empty Heading</h1>
+      <h1>Next Section</h1>
     `);
 
     const h1 = document.querySelector('h1');
-    const toggle = getHeadingToggle(h1);
+    const h1Toggle = getHeadingToggle(h1);
 
-    expect(toggle).toBeFalsy();
+    // h1 has no content at all (immediately followed by same-level heading)
+    expect(h1Toggle).toBeFalsy();
   });
 
   test('corrupted localStorage does not crash', () => {
