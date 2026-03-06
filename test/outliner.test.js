@@ -284,10 +284,17 @@ describe('Markdown Outliner - Regression Protection', () => {
     const script = document.createElement('script');
     script.textContent = scriptContent;
 
+    // Suppress expected console.error from corrupted JSON
+    const originalError = console.error;
+    console.error = jest.fn();
+
     expect(() => {
       document.head.appendChild(script);
       window.markdownOutliner.refresh();
     }).not.toThrow();
+
+    // Restore console.error
+    console.error = originalError;
 
     const h1 = document.querySelector('h1');
     const toggle = getHeadingToggle(h1);
