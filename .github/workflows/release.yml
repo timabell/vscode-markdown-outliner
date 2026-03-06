@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Download artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: build-output
@@ -42,99 +42,81 @@ jobs:
 
       - name: Generate changelog
         id: changelog
-        run: |
-          # Install git-cliff
-          wget -q https://github.com/orhun/git-cliff/releases/download/v2.8.1/git-cliff-2.8.1-x86_64-unknown-linux-gnu.tar.gz
-          tar -xzf git-cliff-2.8.1-x86_64-unknown-linux-gnu.tar.gz
-          chmod +x git-cliff-2.8.1/git-cliff
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: .github/cliff.toml
+          args: --unreleased --strip header
 
-          # Generate changelog for unreleased commits
-          CHANGELOG=$(git-cliff-2.8.1/git-cliff --config .github/cliff.toml --unreleased || echo "")
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Check for releasable commits
-        id: check-release
-        # git-cliff only includes section headers (###) when there are conventional commits - use that as a heuristic for whether there is anything worth a release
+      - name: Check for release-worthy changes
+        id: check_changes
+        # git-cliff only includes section headers (###) when there are conventional commits - use that as a heuristic for whether there is anything worth a release in this push
         run: |
-          if echo "${{ steps.changelog.outputs.changelog }}" | grep -q '###'; then
+          if echo "${{ steps.changelog.outputs.content }}" | grep -q '#'; then
+            echo "Release-worthy changes found"
             echo "should_release=true" >> $GITHUB_OUTPUT
           else
+            echo "No release-worthy changes found"
             echo "should_release=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Detect version bump type
+      - name: Detect bump type
+        if: steps.check_changes.outputs.should_release == 'true'
         id: bump
-        if: steps.check-release.outputs.should_release == 'true'
         run: |
-          chmod +x .github/workflows/detect-bump.sh
           BUMP_TYPE=$(.github/workflows/detect-bump.sh)
           echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Bump type: ${BUMP_TYPE:-patch}"
 
       - name: Calculate next version
+        if: steps.check_changes.outputs.should_release == 'true'
         id: version
-        if: steps.check-release.outputs.should_release == 'true'
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: .github/cliff.toml
+          args: ${{ steps.bump.outputs.type && format('--bump {0} --bumped-version', steps.bump.outputs.type) || '--bumped-version' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set version outputs
+        if: steps.check_changes.outputs.should_release == 'true'
+        id: version_outputs
         run: |
-          # Get current version from package.json
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-
-          # Parse version components
-          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
-
-          # Bump version based on type
-          case "${{ steps.bump.outputs.type }}" in
-            major)
-              major=$((major + 1))
-              minor=0
-              patch=0
-              ;;
-            minor)
-              minor=$((minor + 1))
-              patch=0
-              ;;
-            patch)
-              patch=$((patch + 1))
-              ;;
-          esac
-
-          NEW_VERSION="$major.$minor.$patch"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Next version: $NEW_VERSION"
+          VERSION="${{ steps.version.outputs.content }}"
+          VERSION="${VERSION#v}"  # Remove v prefix if present
+          VERSION="${VERSION%%$'\n'*}"  # Remove any trailing newlines
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
 
       - name: Update package.json version
-        if: steps.check-release.outputs.should_release == 'true'
+        if: steps.check_changes.outputs.should_release == 'true'
         run: |
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          npm version ${{ steps.version_outputs.outputs.version }} --no-git-tag-version
 
       - name: Package extension
-        if: steps.check-release.outputs.should_release == 'true'
+        if: steps.check_changes.outputs.should_release == 'true'
         run: |
           npx @vscode/vsce package
 
-      - name: Create and push tag
-        if: steps.check-release.outputs.should_release == 'true'
+      - name: Create git tag
+        if: steps.check_changes.outputs.should_release == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
-          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
-          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
-          git push origin main
-          git push origin "v${{ steps.version.outputs.version }}"
+          git tag ${{ steps.version_outputs.outputs.tag }}
+          git push origin ${{ steps.version_outputs.outputs.tag }}
 
       - name: Create GitHub Release
-        if: steps.check-release.outputs.should_release == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --title "v${{ steps.version.outputs.version }}" \
-            --notes "${{ steps.changelog.outputs.changelog }}" \
-            *.vsix
+        if: steps.check_changes.outputs.should_release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version_outputs.outputs.tag }}
+          name: ${{ steps.version_outputs.outputs.tag }}
+          body: ${{ steps.changelog.outputs.content }}
+          files: ./*.vsix
 
       - name: Publish to VS Code Marketplace
-        if: steps.check-release.outputs.should_release == 'true'
+        if: steps.check_changes.outputs.should_release == 'true'
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
