@@ -56,8 +56,9 @@ jobs:
 
       - name: Check for releasable commits
         id: check-release
+        # git-cliff only includes section headers (###) when there are conventional commits - use that as a heuristic for whether there is anything worth a release
         run: |
-          if echo "${{ steps.changelog.outputs.changelog }}" | grep -qE '^(feat|fix|perf|doc|style)'; then
+          if echo "${{ steps.changelog.outputs.changelog }}" | grep -q '###'; then
             echo "should_release=true" >> $GITHUB_OUTPUT
           else
             echo "should_release=false" >> $GITHUB_OUTPUT
