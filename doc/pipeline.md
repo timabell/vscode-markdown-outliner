@@ -80,26 +80,29 @@ Publishing to the VS Code Marketplace requires several setup steps across multip
 
 ### Prerequisites
 
+This is completely bananas. Recorded here because I didn't remember it last time and I won't remember it next time. Originally [figured this out for the vscode profile shuffler](https://github.com/timabell/vscode-profile-shuffler/blob/main/README.md#publishing-an-extension).
+
 1. **Create a Publisher Account**
    - Go to https://marketplace.visualstudio.com/manage/publishers/
    - Create a new publisher account if you don't have one
    - Note your publisher name (used in package.json and CLI commands)
 
 2. **Generate Personal Access Token (PAT)**
-   - The token must be created through Azure DevOps (separate from VS Code Marketplace)
-   - Go to Azure DevOps: https://dev.azure.com
-   - Navigate to User Settings → Personal Access Tokens
-   - Create a new token with:
-     - **Organization**: All accessible organizations
-     - **Scopes**: Marketplace → Manage
-     - **Expiration**: Maximum 1 year (you'll need to renew annually)
+   - First, find your Azure DevOps organization name:
+     - Go to https://app.vssps.visualstudio.com/go/profile?mkt=en-us (this redirects to your Azure DevOps profile) - Your org name will be visible **in the URL** after the redirect and sign in.
+       - Reference: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/faq-configure-customize-organization?view=azure-devops
+   - Go to: `https://[yourorg].visualstudio.com/_usersSettings/tokens`
+     - Replace `[yourorg]` with your Azure DevOps organization name (e.g., mine is `timwise`, i.e. https://timwise.visualstudio.com/_usersSettings/tokens )
+   - Create a new Personal Access Token
+   - **Expiration**: Maximum 1 year (you'll need to renew annually)
+   - **Scopes**: Select Marketplace → Manage
    - Save the token immediately - you won't be able to see it again
 
 3. **Add Token to GitHub Secrets**
    - Go to your repository: Settings → Secrets and variables → Actions
    - Create a new repository secret:
      - Name: `VSCE_PAT`
-     - Value: Your Personal Access Token from Azure DevOps
+     - Value: Your Personal Access Token from step 2
 
 ### Local CLI Setup (Optional)
 
