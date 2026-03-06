@@ -1,16 +1,17 @@
 [changelog]
-header = """
-"""
+header = ""
 body = """
+{% if version %}## Release {{ version }}
+{% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
-    ### {{ group | upper_first }}
-    {% for commit in commits %}
-        - {{ commit.message | upper_first }} ({{ commit.id | truncate(length=7, end="") }})\
-    {% endfor %}
+### {{ group | striptags | trim | upper_first }}
+
+{% for commit in commits %}\
+- {{ commit.message | split(pat="\n") | first | split(pat=": ") | slice(start=1) | join(sep=": ") | upper_first }} ({{ commit.id }})
 {% endfor %}
+{% endfor %}\
 """
-footer = """
-"""
+footer = ""
 trim = true
 
 [git]
@@ -18,10 +19,11 @@ conventional_commits = false
 filter_unconventional = false
 split_commits = false
 commit_parsers = [
-  { message = "^feat", group = "✨ Features" },
-  { message = "^fix", group = "🐛 Bug Fixes" },
-  { message = "^perf", group = "⚡ Performance" },
-  { message = "^doc", group = "📚 Documentation" },
-  { message = "^style", group = "🎨 Style" },
+    { message = "^feat", group = "<!-- 1 -->✨ Features" },
+    { message = "^fix", group = "<!-- 2 -->🐛 Bug Fixes" },
+    { message = "^perf", group = "<!-- 3 -->⚡ Performance" },
+    { message = "^doc", group = "<!-- 4 -->📚 Documentation" },
+    { message = "^style", group = "<!-- 5 -->🎨 Style" },
 ]
+filter_commits = false
 tag_pattern = "v[0-9].*"
