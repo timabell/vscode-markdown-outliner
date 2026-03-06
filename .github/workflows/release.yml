@@ -1,0 +1,140 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  build-test:
+    uses: ./.github/workflows/build-test.yml
+
+  release:
+    needs: build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: .
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Install git-cliff
+          wget -q https://github.com/orhun/git-cliff/releases/download/v2.8.1/git-cliff-2.8.1-x86_64-unknown-linux-gnu.tar.gz
+          tar -xzf git-cliff-2.8.1-x86_64-unknown-linux-gnu.tar.gz
+          chmod +x git-cliff-2.8.1/git-cliff
+
+          # Generate changelog for unreleased commits
+          CHANGELOG=$(git-cliff-2.8.1/git-cliff --config .github/cliff.toml --unreleased || echo "")
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Check for releasable commits
+        id: check-release
+        run: |
+          if echo "${{ steps.changelog.outputs.changelog }}" | grep -qE '^(feat|fix|perf|doc|style)'; then
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Detect version bump type
+        id: bump
+        if: steps.check-release.outputs.should_release == 'true'
+        run: |
+          chmod +x .github/workflows/detect-bump.sh
+          BUMP_TYPE=$(.github/workflows/detect-bump.sh)
+          echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Calculate next version
+        id: version
+        if: steps.check-release.outputs.should_release == 'true'
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+
+          # Parse version components
+          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+
+          # Bump version based on type
+          case "${{ steps.bump.outputs.type }}" in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+
+          NEW_VERSION="$major.$minor.$patch"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Next version: $NEW_VERSION"
+
+      - name: Update package.json version
+        if: steps.check-release.outputs.should_release == 'true'
+        run: |
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Package extension
+        if: steps.check-release.outputs.should_release == 'true'
+        run: |
+          npx @vscode/vsce package
+
+      - name: Create and push tag
+        if: steps.check-release.outputs.should_release == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+          git push origin main
+          git push origin "v${{ steps.version.outputs.version }}"
+
+      - name: Create GitHub Release
+        if: steps.check-release.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --title "v${{ steps.version.outputs.version }}" \
+            --notes "${{ steps.changelog.outputs.changelog }}" \
+            *.vsix
+
+      - name: Publish to VS Code Marketplace
+        if: steps.check-release.outputs.should_release == 'true'
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          npx @vscode/vsce publish --packagePath *.vsix
