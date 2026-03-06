@@ -2,7 +2,7 @@
   "name": "markdown-outliner",
   "displayName": "Markdown Outliner",
   "description": "Adds collapsible sections to markdown preview for headings and lists",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publisher": "timabell",
   "author": "Tim Abell <tim@0x5.uk>",
   "engines": {
