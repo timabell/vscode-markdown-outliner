@@ -108,7 +108,7 @@ code --install-extension markdown-outliner-0.1.0.vsix
 
 ## Requirements
 
-- VSCode 1.75.0 or higher
+- VSCode 1.109.0 or higher
 
 ## Known Issues
 
