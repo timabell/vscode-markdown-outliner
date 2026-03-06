@@ -3,12 +3,14 @@
   "displayName": "Markdown Outliner",
   "description": "Adds collapsible sections to markdown preview for headings and lists",
   "version": "0.1.0",
-  "publisher": "your-publisher-name",
+  "publisher": "timabell",
+  "author": "Tim Abell <tim@0x5.uk>",
   "engines": {
     "vscode": "^1.109.0"
   },
   "categories": [
-    "Other"
+    "Formatters",
+    "Visualization"
   ],
   "keywords": [
     "markdown",
@@ -44,7 +46,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/vscode-markdown-outliner.git"
+    "url": "https://github.com/timabell/vscode-markdown-outliner.git"
   },
-  "license": "MIT"
+  "bugs": {
+    "url": "https://github.com/timabell/vscode-markdown-outliner/issues"
+  },
+  "homepage": "https://github.com/timabell/vscode-markdown-outliner#readme",
+  "license": "AGPL-3.0"
 }

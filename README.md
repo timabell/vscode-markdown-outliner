@@ -1,6 +1,10 @@
-# Markdown Outliner
+# VSCode Markdown Outliner
 
 A VSCode extension that adds collapsible sections to the markdown preview, making it easy to navigate and organize long documents.
+
+**Repository**: https://github.com/timabell/vscode-markdown-outliner
+
+**Marketplace**: https://marketplace.visualstudio.com/items?itemName=timabell.markdown-outliner
 
 ## Features
 
@@ -96,9 +100,21 @@ This will watch for file changes and automatically recompile. After making chang
 
 ## Installation
 
-### From VSIX
+### From VSCode Marketplace
 
-To package and install the extension:
+1. Open VSCode
+2. Go to Extensions (Ctrl/Cmd + Shift + X)
+3. Search for "Markdown Outliner"
+4. Click Install
+
+Or install from the command line:
+```bash
+code --install-extension timabell.markdown-outliner
+```
+
+### From VSIX (for development/testing)
+
+To package and install the extension manually:
 
 ```bash
 npm install -g @vscode/vsce
