@@ -43,8 +43,10 @@
     let next = heading.nextElementSibling;
 
     while (next) {
+      // Stop if we hit a heading at the same level or higher (lower number = higher in hierarchy)
       if (next.tagName.match(/^H[1-6]$/)) {
         const nextLevel = parseInt(next.tagName.substring(1));
+        // h1=1 is higher than h2=2, so stop if nextLevel <= level
         if (nextLevel <= level) {
           break;
         }
@@ -422,33 +424,46 @@
     processLists();
   }
 
-  // Hide context menu when clicking elsewhere
-  document.addEventListener('click', () => {
-    hideContextMenu();
-  });
-
-  // Run on initial load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
-  // Re-run when content changes (for dynamic updates)
-  const observer = new MutationObserver(() => {
-    processHeadings();
-    processLists();
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // Expose functions for external control (for command palette integration)
+  // Expose functions for external control (for command palette integration and testing)
   window.markdownOutliner = {
     collapseAll,
     expandAll,
-    refresh: init
+    refresh: init,
+    // Internal functions exposed for testing
+    _test: {
+      processHeadings,
+      processLists,
+      toggleHeading,
+      toggleListItem,
+      getElementKey,
+      getCollapsibleContent,
+      getNestedListContent
+    }
   };
+
+  // Auto-initialize only if not in test mode
+  if (typeof window !== 'undefined' && !window.MARKDOWN_OUTLINER_TEST_MODE) {
+    // Hide context menu when clicking elsewhere
+    document.addEventListener('click', () => {
+      hideContextMenu();
+    });
+
+    // Run on initial load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    // Re-run when content changes (for dynamic updates)
+    const observer = new MutationObserver(() => {
+      processHeadings();
+      processLists();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
 })();
