@@ -19,8 +19,8 @@ A VSCode extension that adds collapsible sections to the markdown preview, makin
 2. Open the preview pane (Ctrl/Cmd + Shift + V)
 3. Click the triangle icons (▶/▼) next to headings or list items to collapse/expand them
 4. Right-click any triangle icon to access:
-   - **Collapse All Children** - Collapse all nested sections under this heading/list
-   - **Expand All Children** - Expand all nested sections under this heading/list
+   - **Collapse All** - Collapse all nested sections under this heading/list
+   - **Expand All** - Expand all nested sections under this heading/list
    - **Collapse All in Document** - Collapse all sections in the entire document
    - **Expand All in Document** - Expand all sections in the entire document
 
@@ -30,21 +30,21 @@ When you collapse a heading, all content up to the next heading of the same or h
 
 Example:
 ```markdown
-## Section 1 ▼
+## ▼ Section 1
 Content here...
 ### Subsection 1.1
 More content...
-## Section 2 ▼
+## ▼ Section 2
 ```
 
-Clicking the triangle next to "Section 1" will hide everything until "Section 2".
+Clicking the triangle at the start of the "Section 1" heading will hide everything until "Section 2".
 
 ### Lists
 
 Nested lists automatically get collapse/expand controls:
 
 ```markdown
-- Item 1 ▼
+- ▼ Item 1
   - Sub-item 1.1
   - Sub-item 1.2
 - Item 2
