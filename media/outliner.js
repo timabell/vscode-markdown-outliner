@@ -229,20 +229,6 @@
     processLists();
   }
 
-  // Listen for keyboard shortcuts (optional)
-  document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + Shift + [  = Collapse All
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === '[') {
-      e.preventDefault();
-      collapseAll();
-    }
-    // Ctrl/Cmd + Shift + ]  = Expand All
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === ']') {
-      e.preventDefault();
-      expandAll();
-    }
-  });
-
   // Run on initial load
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

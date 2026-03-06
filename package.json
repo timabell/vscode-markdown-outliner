@@ -25,16 +25,6 @@
     ],
     "markdown.previewStyles": [
       "./media/outliner.css"
-    ],
-    "commands": [
-      {
-        "command": "markdown-outliner.collapseAll",
-        "title": "Markdown Outliner: Collapse All Sections"
-      },
-      {
-        "command": "markdown-outliner.expandAll",
-        "title": "Markdown Outliner: Expand All Sections"
-      }
     ]
   },
   "scripts": {

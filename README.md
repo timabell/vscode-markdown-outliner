@@ -7,12 +7,6 @@ A VSCode extension that adds collapsible sections to the markdown preview, makin
 - **Collapsible Headings**: Click the triangle icon next to any heading to collapse/expand all content under that heading
 - **Collapsible Lists**: Nested lists can be collapsed to hide sub-items
 - **Persistent State**: Your collapse/expand preferences are saved and restored when you reopen files
-- **Keyboard Shortcuts**:
-  - `Ctrl/Cmd + Shift + [` - Collapse all sections
-  - `Ctrl/Cmd + Shift + ]` - Expand all sections
-- **Command Palette Commands**:
-  - `Markdown Outliner: Collapse All Sections`
-  - `Markdown Outliner: Expand All Sections`
 
 ## Usage
 
@@ -70,8 +64,7 @@ Nested lists automatically get collapse/expand controls:
 
 4. **Test the features:**
    - Click the triangles to collapse/expand sections
-   - Try the keyboard shortcuts: `Ctrl/Cmd + Shift + [` and `Ctrl/Cmd + Shift + ]`
-   - Open the Command Palette (`Ctrl/Cmd + Shift + P`) and search for "Markdown Outliner"
+   - Collapse state is automatically saved and restored
 
 ### Development Workflow
 
