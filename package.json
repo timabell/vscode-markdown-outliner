@@ -1,0 +1,60 @@
+{
+  "name": "markdown-outliner",
+  "displayName": "Markdown Outliner",
+  "description": "Adds collapsible sections to markdown preview for headings and lists",
+  "version": "0.1.0",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "markdown",
+    "preview",
+    "collapse",
+    "fold",
+    "outline"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "markdown.previewScripts": [
+      "./media/outliner.js"
+    ],
+    "markdown.previewStyles": [
+      "./media/outliner.css"
+    ],
+    "commands": [
+      {
+        "command": "markdown-outliner.collapseAll",
+        "title": "Markdown Outliner: Collapse All Sections"
+      },
+      {
+        "command": "markdown-outliner.expandAll",
+        "title": "Markdown Outliner: Expand All Sections"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "@types/vscode": "^1.109.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
+    "typescript": "^5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/vscode-markdown-outliner.git"
+  },
+  "license": "MIT"
+}

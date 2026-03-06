@@ -1,0 +1,104 @@
+/* Markdown Outliner Styles */
+
+/* Toggle button base styles */
+.outliner-toggle {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin-right: 0.3em;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8em;
+  line-height: 1;
+  vertical-align: baseline;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.outliner-toggle:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Heading-specific toggle styles */
+.outliner-heading {
+  cursor: pointer;
+  position: relative;
+}
+
+.outliner-heading:hover {
+  opacity: 0.8;
+}
+
+.outliner-heading .outliner-toggle {
+  position: relative;
+  top: 0.1em;
+}
+
+/* List item toggle styles */
+.outliner-list-toggle {
+  margin-right: 0.4em;
+  margin-left: -1.2em;
+  position: relative;
+  left: 0;
+}
+
+.outliner-list-item {
+  position: relative;
+}
+
+/* Hidden content */
+.outliner-hidden {
+  display: none !important;
+}
+
+/* Collapsed state indicators */
+.outliner-heading.collapsed {
+  margin-bottom: 0.5em;
+}
+
+.outliner-list-item.collapsed {
+  margin-bottom: 0;
+}
+
+/* Animation for smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  .outliner-heading,
+  .outliner-list-item {
+    transition: margin-bottom 0.2s ease;
+  }
+}
+
+/* Accessibility improvements */
+.outliner-toggle:focus {
+  outline: 2px solid var(--vscode-focusBorder, #007acc);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Dark theme adjustments */
+body.vscode-dark .outliner-toggle,
+body.vscode-high-contrast .outliner-toggle {
+  opacity: 0.7;
+}
+
+body.vscode-dark .outliner-toggle:hover,
+body.vscode-high-contrast .outliner-toggle:hover {
+  opacity: 1;
+}
+
+/* Ensure proper spacing for nested lists */
+.outliner-list-item > ul,
+.outliner-list-item > ol {
+  margin-top: 0.3em;
+}
+
+/* Make the entire heading clickable for better UX */
+.outliner-heading {
+  user-select: none;
+}
+
+/* Prevent text selection during clicking */
+.outliner-toggle::selection {
+  background: transparent;
+}
