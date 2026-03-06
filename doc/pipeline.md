@@ -74,13 +74,54 @@ feat: redesign configuration API
 bump: major
 ```
 
-## Required Secrets
+## Publishing Setup
 
-For the workflow to publish to VS Code Marketplace, you need to set up:
+Publishing to the VS Code Marketplace requires several setup steps across multiple platforms. This only needs to be done once (plus annual token renewal).
 
-1. **VSCE_PAT** - Personal Access Token for VS Code Marketplace
-   - Create at: https://marketplace.visualstudio.com/manage/publishers/
-   - Add to repository secrets: Settings → Secrets → Actions → New repository secret
+### Prerequisites
+
+1. **Create a Publisher Account**
+   - Go to https://marketplace.visualstudio.com/manage/publishers/
+   - Create a new publisher account if you don't have one
+   - Note your publisher name (used in package.json and CLI commands)
+
+2. **Generate Personal Access Token (PAT)**
+   - The token must be created through Azure DevOps (separate from VS Code Marketplace)
+   - Go to Azure DevOps: https://dev.azure.com
+   - Navigate to User Settings → Personal Access Tokens
+   - Create a new token with:
+     - **Organization**: All accessible organizations
+     - **Scopes**: Marketplace → Manage
+     - **Expiration**: Maximum 1 year (you'll need to renew annually)
+   - Save the token immediately - you won't be able to see it again
+
+3. **Add Token to GitHub Secrets**
+   - Go to your repository: Settings → Secrets and variables → Actions
+   - Create a new repository secret:
+     - Name: `VSCE_PAT`
+     - Value: Your Personal Access Token from Azure DevOps
+
+### Local CLI Setup (Optional)
+
+For manual publishing or testing locally:
+
+```bash
+# Install vsce globally
+npm install -g @vscode/vsce
+
+# Login with your publisher account
+vsce login [publisher-name]
+# You'll be prompted for your PAT
+
+# Package and publish manually
+vsce package
+vsce publish
+```
+
+### Additional Resources
+
+- [Official VS Code Publishing Guide](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#publishing-extensions)
+- Note: The publishing workflow is notably complex, spanning multiple disconnected platforms (VS Code Marketplace, Azure DevOps, GitHub). Document your setup for future reference, especially for token renewal.
 
 ## Local Testing
 
