@@ -57,5 +57,11 @@
     "url": "https://github.com/timabell/vscode-markdown-outliner/issues"
   },
   "homepage": "https://github.com/timabell/vscode-markdown-outliner#readme",
-  "license": "AGPL-3.0"
+  "license": "AGPL-3.0",
+  "files": [
+    "out/",
+    "media/",
+    "LICENSE",
+    "README.md"
+  ]
 }
