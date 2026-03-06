@@ -4,6 +4,8 @@
 
   const STORAGE_KEY = 'markdown-outliner-state';
   let collapsedState = {};
+  let contextMenu = null;
+  let contextMenuTarget = null;
 
   // Load saved state from localStorage
   function loadState() {
@@ -70,6 +72,153 @@
     return button;
   }
 
+  // Create context menu
+  function createContextMenu() {
+    if (contextMenu) return contextMenu;
+
+    const menu = document.createElement('div');
+    menu.className = 'outliner-context-menu';
+    menu.innerHTML = `
+      <div class="outliner-menu-item" data-action="collapse-children">Collapse All</div>
+      <div class="outliner-menu-item" data-action="expand-children">Expand All</div>
+      <div class="outliner-menu-divider"></div>
+      <div class="outliner-menu-item" data-action="collapse-all">Collapse All in Document</div>
+      <div class="outliner-menu-item" data-action="expand-all">Expand All in Document</div>
+    `;
+
+    menu.addEventListener('click', (e) => {
+      const item = e.target.closest('.outliner-menu-item');
+      if (!item) return;
+
+      const action = item.dataset.action;
+      handleContextMenuAction(action);
+      hideContextMenu();
+    });
+
+    document.body.appendChild(menu);
+    contextMenu = menu;
+    return menu;
+  }
+
+  // Show context menu at position
+  function showContextMenu(x, y, target) {
+    const menu = createContextMenu();
+    contextMenuTarget = target;
+
+    menu.style.left = x + 'px';
+    menu.style.top = y + 'px';
+    menu.classList.add('visible');
+
+    // Adjust if menu goes off screen
+    setTimeout(() => {
+      const rect = menu.getBoundingClientRect();
+      if (rect.right > window.innerWidth) {
+        menu.style.left = (x - rect.width) + 'px';
+      }
+      if (rect.bottom > window.innerHeight) {
+        menu.style.top = (y - rect.height) + 'px';
+      }
+    }, 0);
+  }
+
+  // Hide context menu
+  function hideContextMenu() {
+    if (contextMenu) {
+      contextMenu.classList.remove('visible');
+    }
+    contextMenuTarget = null;
+  }
+
+  // Handle context menu actions
+  function handleContextMenuAction(action) {
+    if (!contextMenuTarget) return;
+
+    const isHeading = contextMenuTarget.classList.contains('outliner-heading');
+
+    switch (action) {
+      case 'collapse-children':
+        if (isHeading) {
+          collapseChildrenHeadings(contextMenuTarget);
+        } else {
+          collapseChildrenLists(contextMenuTarget);
+        }
+        break;
+      case 'expand-children':
+        if (isHeading) {
+          expandChildrenHeadings(contextMenuTarget);
+        } else {
+          expandChildrenLists(contextMenuTarget);
+        }
+        break;
+      case 'collapse-all':
+        collapseAll();
+        break;
+      case 'expand-all':
+        expandAll();
+        break;
+    }
+  }
+
+  // Collapse all child headings under a heading
+  function collapseChildrenHeadings(heading) {
+    // Collapse the heading itself
+    toggleHeading(heading, true);
+
+    // Collapse all child headings and list items
+    const content = getCollapsibleContent(heading);
+    content.forEach(el => {
+      if (el.tagName.match(/^H[1-6]$/) && el.classList.contains('outliner-heading')) {
+        toggleHeading(el, true);
+      }
+    });
+
+    // Also collapse all list items within this heading's content
+    content.forEach(el => {
+      const listItems = el.querySelectorAll ? el.querySelectorAll('.outliner-list-item') : [];
+      listItems.forEach(item => toggleListItem(item, true));
+    });
+  }
+
+  // Expand all child headings under a heading
+  function expandChildrenHeadings(heading) {
+    // Expand the heading itself
+    toggleHeading(heading, false);
+
+    // Expand all child headings
+    const content = getCollapsibleContent(heading);
+    content.forEach(el => {
+      if (el.tagName.match(/^H[1-6]$/) && el.classList.contains('outliner-heading')) {
+        toggleHeading(el, false);
+      }
+    });
+
+    // Also expand all list items within this heading's content
+    content.forEach(el => {
+      const listItems = el.querySelectorAll ? el.querySelectorAll('.outliner-list-item') : [];
+      listItems.forEach(item => toggleListItem(item, false));
+    });
+  }
+
+  // Collapse all child list items under a list item
+  function collapseChildrenLists(listItem) {
+    // Collapse the list item itself
+    toggleListItem(listItem, true);
+
+    // Collapse all nested children
+    const nested = listItem.querySelectorAll('.outliner-list-item');
+    nested.forEach(item => toggleListItem(item, true));
+  }
+
+  // Expand all child list items under a list item
+  function expandChildrenLists(listItem) {
+    // Expand the list item itself
+    toggleListItem(listItem, false);
+
+    // Expand all nested children
+    const nested = listItem.querySelectorAll('.outliner-list-item');
+    nested.forEach(item => toggleListItem(item, false));
+  }
+
   // Toggle collapse state for a heading
   function toggleHeading(heading, forceState = null) {
     const key = getElementKey(heading);
@@ -89,7 +238,37 @@
       heading.classList.remove('collapsed');
       toggle.textContent = '▼';
       toggle.setAttribute('aria-label', 'Collapse');
-      content.forEach(el => el.classList.remove('outliner-hidden'));
+
+      // When expanding, track which child headings are collapsed
+      // so we don't show their content
+      let skipUntil = null;
+      content.forEach(el => {
+        // If we're skipping content under a collapsed child heading
+        if (skipUntil) {
+          if (el.tagName.match(/^H[1-6]$/)) {
+            const elLevel = parseInt(el.tagName.substring(1));
+            const skipLevel = parseInt(skipUntil.tagName.substring(1));
+            // Stop skipping when we reach a heading at same or higher level
+            if (elLevel <= skipLevel) {
+              skipUntil = null;
+            }
+          }
+          // Don't show content that belongs to collapsed child heading
+          if (skipUntil) return;
+        }
+
+        // If this is a collapsed child heading, start skipping its content
+        if (el.tagName.match(/^H[1-6]$/) && el.classList.contains('collapsed')) {
+          skipUntil = el;
+          // Show the heading itself, but not its content
+          el.classList.remove('outliner-hidden');
+          return;
+        }
+
+        // Show this element
+        el.classList.remove('outliner-hidden');
+      });
+
       delete collapsedState[key];
     }
 
@@ -154,6 +333,13 @@
         e.stopPropagation();
         toggleHeading(heading);
       });
+
+      // Add context menu handler
+      toggle.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showContextMenu(e.pageX, e.pageY, heading);
+      });
     });
   }
 
@@ -199,6 +385,13 @@
         e.stopPropagation();
         toggleListItem(listItem);
       });
+
+      // Add context menu handler
+      toggle.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showContextMenu(e.pageX, e.pageY, listItem);
+      });
     });
   }
 
@@ -228,6 +421,11 @@
     processHeadings();
     processLists();
   }
+
+  // Hide context menu when clicking elsewhere
+  document.addEventListener('click', () => {
+    hideContextMenu();
+  });
 
   // Run on initial load
   if (document.readyState === 'loading') {

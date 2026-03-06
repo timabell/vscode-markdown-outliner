@@ -95,3 +95,39 @@ body.vscode-high-contrast .outliner-toggle:hover {
 .outliner-toggle::selection {
   background: transparent;
 }
+
+/* Context Menu */
+.outliner-context-menu {
+  position: absolute;
+  background: var(--vscode-menu-background, #252526);
+  border: 1px solid var(--vscode-menu-border, #454545);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  padding: 4px 0;
+  z-index: 10000;
+  min-width: 150px;
+  display: none;
+}
+
+.outliner-context-menu.visible {
+  display: block;
+}
+
+.outliner-menu-item {
+  padding: 6px 16px;
+  cursor: pointer;
+  color: var(--vscode-menu-foreground, #cccccc);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.outliner-menu-item:hover {
+  background: var(--vscode-menu-selectionBackground, #094771);
+  color: var(--vscode-menu-selectionForeground, #ffffff);
+}
+
+.outliner-menu-divider {
+  height: 1px;
+  background: var(--vscode-menu-separatorBackground, #454545);
+  margin: 4px 0;
+}
