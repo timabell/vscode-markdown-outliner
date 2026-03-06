@@ -30,7 +30,12 @@
 
   // Generate a unique key for an element based on its content and position
   function getElementKey(element) {
-    const text = element.textContent.trim().substring(0, 100);
+    // Clone element to get text without toggle buttons
+    const clone = element.cloneNode(true);
+    const toggles = clone.querySelectorAll('.outliner-toggle, .outliner-list-toggle');
+    toggles.forEach(t => t.remove());
+
+    const text = clone.textContent.trim().substring(0, 100);
     const tag = element.tagName.toLowerCase();
     const parent = element.parentElement?.tagName.toLowerCase() || '';
     return `${tag}:${parent}:${text}`;

@@ -140,7 +140,7 @@ describe('Markdown Outliner - Core User Behaviors', () => {
     expect(isHidden(nestedList)).toBe(false);
   });
 
-  test.skip('collapse state persists across page reload', () => {
+  test('collapse state persists across page reload', () => {
     setupTestDocument(`
       <h1>Title</h1>
       <p id="content">Content</p>
