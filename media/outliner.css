@@ -3,16 +3,17 @@
 /* Toggle button base styles */
 .outliner-toggle {
   display: inline-block;
-  width: 1em;
-  height: 1em;
-  margin-right: 0.3em;
+  width: 14px;
+  height: 14px;
+  margin-right: 0.4em;
   cursor: pointer;
   user-select: none;
-  font-size: 0.8em;
-  line-height: 1;
-  vertical-align: baseline;
+  font-size: 12px;
+  line-height: 14px;
+  vertical-align: middle;
   opacity: 0.6;
   transition: opacity 0.2s ease, transform 0.2s ease;
+  text-align: center;
 }
 
 .outliner-toggle:hover {
@@ -23,7 +24,6 @@
 /* Heading-specific toggle styles */
 .outliner-heading {
   cursor: pointer;
-  position: relative;
 }
 
 .outliner-heading:hover {
@@ -31,20 +31,13 @@
 }
 
 .outliner-heading .outliner-toggle {
-  position: relative;
-  top: 0.1em;
+  vertical-align: middle;
+  margin-right: 0.5em;
 }
 
 /* List item toggle styles */
 .outliner-list-toggle {
-  margin-right: 0.4em;
-  margin-left: -1.2em;
-  position: relative;
-  left: 0;
-}
-
-.outliner-list-item {
-  position: relative;
+  margin-right: 0.5em;
 }
 
 /* Hidden content */
