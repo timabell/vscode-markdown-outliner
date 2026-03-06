@@ -77,6 +77,19 @@ This section contains various types of content:
    2. Another nested numbered item
 3. Numbered list item 3
 
+## Logseq style bullets
+
+- ## Bullet with heading
+  - ### Inner heading bullet
+  - text
+- more
+  - ```javascript
+    let x = 42;
+    ```
+  - > bob
+    > said  
+    > "hi"
+
 ### Tables
 
 | Column 1 | Column 2 | Column 3 |
