@@ -278,7 +278,7 @@
   // Toggle collapse state for a list item
   function toggleListItem(listItem, forceState = null) {
     const key = getElementKey(listItem);
-    const toggle = listItem.querySelector('.outliner-toggle');
+    const toggle = listItem.querySelector('.outliner-list-toggle');
     if (!toggle) return;
 
     const isCollapsed = forceState !== null ? forceState : !listItem.classList.contains('collapsed');
@@ -310,6 +310,9 @@
     headings.forEach(heading => {
       // Skip if already processed
       if (heading.querySelector('.outliner-toggle')) return;
+
+      // Skip headings inside list items - they'll be handled by list item toggles
+      if (heading.closest('li')) return;
 
       const content = getCollapsibleContent(heading);
       if (content.length === 0) return;
@@ -348,8 +351,8 @@
     const listItems = document.querySelectorAll('li');
 
     listItems.forEach(listItem => {
-      // Skip if already processed
-      if (listItem.querySelector(':scope > .outliner-toggle')) return;
+      // Skip if already processed (check both direct child and inside heading)
+      if (listItem.querySelector('.outliner-list-toggle')) return;
 
       const nested = getNestedListContent(listItem);
       if (nested.length === 0) return;
@@ -360,14 +363,11 @@
 
       toggle.classList.add('outliner-list-toggle');
 
-      // Find the first text node or inline element to insert before
-      let insertPoint = listItem.firstChild;
-      while (insertPoint && insertPoint.nodeType !== Node.TEXT_NODE && !insertPoint.textContent.trim()) {
-        insertPoint = insertPoint.nextSibling;
-      }
-
-      if (insertPoint) {
-        listItem.insertBefore(toggle, insertPoint);
+      // If the list item starts with a heading, insert toggle inside the heading
+      // Otherwise, insert at the beginning of the list item
+      const firstElement = listItem.firstElementChild;
+      if (firstElement && firstElement.tagName.match(/^H[1-6]$/)) {
+        firstElement.insertBefore(toggle, firstElement.firstChild);
       } else {
         listItem.insertBefore(toggle, listItem.firstChild);
       }

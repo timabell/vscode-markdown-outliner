@@ -81,14 +81,18 @@ This section contains various types of content:
 
 - ## Bullet with heading
   - ### Inner heading bullet
+    - yet more
   - text
+    - moooore
 - more
   - ```javascript
     let x = 42;
     ```
+    - i can haz code
   - > bob
     > said  
     > "hi"
+    - no really
 
 ### Tables
 
