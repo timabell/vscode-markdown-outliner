@@ -131,6 +131,16 @@ code --install-extension markdown-outliner-0.1.0.vsix
 - The bidirectional sync between editor folding and preview folding is not yet implemented
 - State is stored per-document based on content, so restructuring a document may reset the collapse state
 
+## Development
+
+### CI/CD Pipeline
+
+This project uses GitHub Actions for automated testing, building, and releases. See [doc/pipeline.md](doc/pipeline.md) for details on:
+- Semantic commit conventions
+- Automated version bumping
+- Release workflow
+- Publishing to VS Code Marketplace
+
 ## Related
 
 This extension addresses the feature request in [microsoft/vscode#115998](https://github.com/microsoft/vscode/issues/115998).
