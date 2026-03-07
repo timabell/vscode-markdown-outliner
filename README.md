@@ -6,6 +6,8 @@ A VSCode extension that adds collapsible sections to the markdown preview, makin
 
 **Marketplace**: https://marketplace.visualstudio.com/items?itemName=timabell.markdown-outliner
 
+![screenshot of vscode with plugin in action](doc/screenshot.png)
+
 ## Features
 
 - **Collapsible Headings**: Click the triangle icon next to any heading to collapse/expand all content under that heading
